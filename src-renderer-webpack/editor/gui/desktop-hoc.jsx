@@ -70,7 +70,13 @@ const securityManager = {
   canNotify: () => true,
 
   // Does not work in Electron:
-  canGeolocate: () => false
+  canGeolocate: () => false,
+
+  // UliBlock: extensions load without a confirmation dialog and unsandboxed.
+  // This intentionally matches the warning in the extension gallery: custom
+  // extension code is trusted, third-party code can be malicious.
+  canLoadExtensionFromProject: () => true,
+  getSandboxMode: () => 'unsandboxed'
 };
 
 const USERNAME_KEY = 'tw:username';
