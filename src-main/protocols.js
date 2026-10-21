@@ -1,3 +1,4 @@
+const fsPromises = require('fs/promises');
 const path = require('path');
 const zlib = require('zlib');
 const nodeURL = require('url');
@@ -58,6 +59,10 @@ const FILE_SCHEMES = {
   },
   'tw-extensions': {
     root: path.resolve(__dirname, '../dist-extensions'),
+    // UliBlock: bundled files win; anything missing is fetched from the real
+    // gallery once and cached under <userData>/extension-cache (see below).
+    remoteOrigin: 'https://extensions.turbowarp.org',
+    cacheDirectoryName: 'extension-cache',
     standard: true,
     supportFetch: true,
     cors: true,
@@ -253,12 +258,50 @@ const createModernProtocolHandler = (metadata) => {
       if (metadata.brotli) {
         // Reading it all into memory is not ideal, but we've had so many problems with streaming
         // files from the asar that I can settle with this.
-        const brotliResponse = await net.fetch(nodeURL.pathToFileURL(`${resolved}.br`));
-        const brotliData = await brotliResponse.arrayBuffer();
-        const decompressed = await brotliDecompress(brotliData);
-        return new Response(decompressed, {
-          headers
-        });
+        try {
+          const brotliResponse = await net.fetch(nodeURL.pathToFileURL(`${resolved}.br`));
+          const brotliData = await brotliResponse.arrayBuffer();
+          const decompressed = await brotliDecompress(brotliData);
+          return new Response(decompressed, {
+            headers
+          });
+        } catch (bundledError) {
+          // UliBlock: not bundled (or bundle pruned) -- fall back to the
+          // on-disk cache, then to the network, and populate the cache.
+          if (!metadata.remoteOrigin || !metadata.cacheDirectoryName) {
+            throw bundledError;
+          }
+          const cacheRoot = path.join(app.getPath('userData'), metadata.cacheDirectoryName, '/');
+          const cachePath = path.join(cacheRoot, parsedURL.pathname);
+          if (!cachePath.startsWith(cacheRoot)) {
+            throw bundledError;
+          }
+          try {
+            const cached = await fsPromises.readFile(cachePath);
+            return new Response(cached, {
+              headers
+            });
+          } catch (cacheError) {
+            // Not cached yet; fetch below.
+          }
+          const remoteURL = `${metadata.remoteOrigin}${parsedURL.pathname}${parsedURL.search}`;
+          const remoteResponse = await net.fetch(remoteURL);
+          if (!remoteResponse.ok) {
+            throw new Error(`Could not fetch ${remoteURL}: HTTP ${remoteResponse.status}`);
+          }
+          const remoteData = Buffer.from(await remoteResponse.arrayBuffer());
+          try {
+            await fsPromises.mkdir(path.dirname(cachePath), {recursive: true});
+            const tempPath = `${cachePath}.${process.pid}.tmp`;
+            await fsPromises.writeFile(tempPath, remoteData);
+            await fsPromises.rename(tempPath, cachePath);
+          } catch (writeError) {
+            console.error('Could not write extension cache', writeError);
+          }
+          return new Response(remoteData, {
+            headers
+          });
+        }
       }
 
       const response = await net.fetch(nodeURL.pathToFileURL(resolved));
