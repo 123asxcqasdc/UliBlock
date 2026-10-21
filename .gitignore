@@ -9,7 +9,8 @@ dist
 dist-renderer-webpack
 dist-library-files
 dist-extensions
-src-renderer/packager/standalone.html
+# UliBlock: packager standalone is vendored (built from 123asxcqasdc/packager)
+# src-renderer/packager/standalone.html
 
 # Debian release scripts create files that shouldn't be committed
 deb
