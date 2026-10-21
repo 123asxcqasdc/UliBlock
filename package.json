@@ -1,6 +1,6 @@
 {
-  "name": "turbowarp-desktop",
-  "description": "Scratch mod with a compiler, dark mode, a bunch of addons, and more.",
+  "name": "uliblock",
+  "description": "UliBlock \u2014 Scratch mod based on TurboWarp: compiler, dark mode, addons, custom extension gallery and more.",
   "version": "1.16.0",
   "license": "GPL-3.0",
   "author": {
@@ -38,7 +38,7 @@
     "postcss-import": "^14.0.0",
     "postcss-loader": "^4.2.0",
     "postcss-simple-vars": "^6.0.3",
-    "scratch-gui": "github:TurboWarp/scratch-gui#develop",
+    "scratch-gui": "github:123asxcqasdc/scratch-gui#uliblock",
     "style-loader": "^0.23.0",
     "url-loader": "^4.1.1",
     "webpack": "4.47.0",
@@ -47,21 +47,25 @@
   "overrides": {
     "webpack@4.47.0": {
       "terser-webpack-plugin": "^4.2.3"
+    },
+    "@turbowarp/paper": "^0.12.202407262155",
+    "scratch-render-fonts": "github:PenguinMod/penguinmod-render-fonts#master",
+    "scratch-paint": {
+      "react-responsive": "^5.0.0"
     }
   },
-  "homepage": "https://desktop.turbowarp.org/",
+  "homepage": "https://github.com/123asxcqasdc/UliBlock",
   "repository": {
     "type": "git",
-    "url": "https://github.com/TurboWarp/desktop.git"
+    "url": "https://github.com/123asxcqasdc/UliBlock.git"
   },
   "bugs": {
-    "url": "https://github.com/TurboWarp/desktop/issues",
-    "email": "contact@turbowarp.org"
+    "url": "https://github.com/123asxcqasdc/UliBlock/issues"
   },
   "main": "./src-main/entrypoint.js",
   "build": {
-    "appId": "org.turbowarp.desktop",
-    "productName": "TurboWarp",
+    "appId": "org.uliblock.desktop",
+    "productName": "UliBlock",
     "files": [
       "node_modules/**/*",
       "src-main/**/*",
@@ -95,71 +99,22 @@
         }
       ]
     },
-    "appx": {
-      "artifactName": "${productName}-MS-Store-${version}-${arch}.${ext}",
-      "applicationId": "TurboWarp",
-      "displayName": "TurboWarp",
-      "identityName": "45747ThomasWeber.TurboWarpDesktop",
-      "publisher": "CN=18FA7D4F-01BF-49F2-BF56-782DCEA49C69",
-      "publisherDisplayName": "Thomas Weber",
-      "backgroundColor": "#4c97ff",
-      "showNameOnTiles": true,
-      "languages": [
-        "en-US",
-        "nl",
-        "de",
-        "it",
-        "ko"
-      ]
-    },
     "nsis": {
       "artifactName": "${productName}-Setup-${version}-${arch}.${ext}",
       "oneClick": false,
       "deleteAppDataOnUninstall": false,
       "allowToChangeInstallationDirectory": true
     },
-    "mac": {
-      "artifactName": "${productName}-Setup-${version}.${ext}",
-      "icon": "build/icon.icns",
-      "category": "public.app-category.education",
-      "darkModeSupport": true,
-      "gatekeeperAssess": false,
-      "hardenedRuntime": true,
-      "entitlements": "build/entitlements.mac.plist",
-      "entitlementsInherit": "build/entitlements.mac.plist",
-      "extendInfo": {
-        "ITSAppUsesNonExemptEncryption": false,
-        "LSMultipleInstancesProhibited": true,
-        "NSCameraUsageDescription": "This app requires camera access when using the video sensing or face sensing blocks.",
-        "NSMicrophoneUsageDescription": "This app requires microphone access when recording sounds or detecting loudness."
-      },
-      "target": [
-        {
-          "arch": "universal",
-          "target": "dmg"
-        }
-      ]
-    },
-    "mas": {
-      "hardenedRuntime": false,
-      "entitlements": "build/entitlements.mas.plist",
-      "entitlementsInherit": "build/entitlements.mas.inherit.plist",
-      "provisioningProfile": "build/distribution.provisionprofile"
-    },
-    "masDev": {
-      "type": "development",
-      "provisioningProfile": "build/development.provisionprofile"
-    },
     "linux": {
-      "executableName": "turbowarp-desktop",
+      "executableName": "uliblock",
       "artifactName": "${productName}-${os}-${arch}-${version}.${ext}",
       "icon": "./build/",
       "synopsis": "Mod of Scratch with a compiler and more features.",
-      "description": "TurboWarp is a Scratch mod with a compiler to run projects faster, dark mode for your eyes, a bunch of addons to improve the editor, and more.",
+      "description": "UliBlock is a Scratch mod (based on TurboWarp) with a compiler to run projects faster, dark mode, addons, a custom extension gallery, and more.",
       "category": "Development",
       "desktop": {
         "entry": {
-          "StartupWMClass": "turbowarp-desktop",
+          "StartupWMClass": "uliblock",
           "Keywords": "scratch;"
         }
       },
@@ -176,17 +131,6 @@
         {
           "target": "tar.gz"
         }
-      ]
-    },
-    "snap": {
-      "summary": "Scratch mod with a compiler, dark mode, a bunch of addons, and more.",
-      "allowNativeWayland": true,
-      "plugs": [
-        "default",
-        "camera",
-        "audio-record",
-        "joystick",
-        "removable-media"
       ]
     },
     "appImage": {

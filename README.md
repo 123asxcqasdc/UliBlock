@@ -1,3 +1,10 @@
+# UliBlock
+
+UliBlock is a fork of TurboWarp Desktop — a Scratch mod with a compiler, dark mode,
+addons, a custom extension gallery (click-to-import), the PenguinMod paint editor,
+and a trimmed asset library. Only Windows and Linux builds are supported.
+See [CHANGES.md](CHANGES.md) for every difference from upstream and build order.
+
 # TurboWarp Desktop
 
 TurboWarp as a desktop app.
