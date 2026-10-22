@@ -24,8 +24,13 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: 24
+    - name: Use HTTPS for GitHub git dependencies
+      run: |
+        git config --global --add url."https://github.com/".insteadOf "git@github.com:"
+        git config --global --add url."https://github.com/".insteadOf "ssh://git@github.com/"
+        git config --global --add url."https://github.com/".insteadOf "git+ssh://git@github.com/"
     - name: Install dependencies
-      run: npm ci --loglevel=info
+      run: npm install --no-audit --no-fund --loglevel=info
     - name: Fetch
       run: npm run fetch
     - name: Compile
@@ -83,9 +88,14 @@ jobs:
       run: |
         npm config set cache D:\npm-cache
         npm config set prefix D:\npm-prefix
+    - name: Use HTTPS for GitHub git dependencies
+      run: |
+        git config --global --add url."https://github.com/".insteadOf "git@github.com:"
+        git config --global --add url."https://github.com/".insteadOf "ssh://git@github.com/"
+        git config --global --add url."https://github.com/".insteadOf "git+ssh://git@github.com/"
     - name: Install dependencies
       working-directory: D:\repo
-      run: npm ci --loglevel=info
+      run: npm install --no-audit --no-fund --loglevel=info
     - name: Fetch
       working-directory: D:\repo
       run: npm run fetch
@@ -100,42 +110,12 @@ jobs:
     - name: Print file tree
       working-directory: D:\repo
       run: node scripts/print-file-tree.mjs dist
-    - name: Upload unsigned artifacts to GitHub Actions
+    - name: Upload artifacts to GitHub Actions
       uses: actions/upload-artifact@v4
       with:
-        name: windows-unsigned
+        name: windows
         path: D:\repo\dist\*.exe
-    - name: Upload Microsoft Store artifact to GitHub Actions
-      uses: actions/upload-artifact@v4
-      with:
-    - name: Upload unsigned artifacts for SignPath
-      uses: actions/upload-artifact@v4
-      id: signpath-unsigned
-      with:
-        name: artifact-for-signpath
-        # keep this list in sync with the signed artifiact upload below
-        path: |
-          D:\repo\dist\UliBlock-Setup*x64.exe
-    - name: Sign executables with SignPath
-      uses: signpath/github-action-submit-signing-request@4f13d373e8f0cd8d3c0465ff4877feff27aed2ae
-      with:
-        api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
-        organization-id: 04444052-261e-46eb-8168-ed0eee93c57c
-        project-slug: desktop_
-        signing-policy-slug: release-signing
-        github-artifact-id: ${{ steps.signpath-unsigned.outputs.artifact-id }}
-        artifact-configuration-slug: sign_installers
-        wait-for-completion: true
-        # overwrite the unsigned files
-        output-artifact-directory: D:\repo\dist
-    - name: Upload signed artifacts to GitHub Actions
-      uses: actions/upload-artifact@v4
-      with:
-        name: windows-signed
-        # keep this list in sync with the signpath artifact upload above
-        path: |
-          D:\repo\dist\UliBlock-Setup*x64.exe
-    - name: Upload signed artifacts to tag
+    - name: Upload artifacts to tag
       working-directory: D:\repo
       run: |
         node scripts/upload-to-github-releases.mjs 123asxcqasdc UliBlock "dist/*.exe"

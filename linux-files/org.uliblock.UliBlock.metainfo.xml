@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright 2021-2025 Thomas Weber -->
 <component type="desktop-application">
-  <id>org.turbowarp.TurboWarp</id>
-  <launchable type="desktop-id">org.turbowarp.TurboWarp.desktop</launchable>
+  <id>org.uliblock.UliBlock</id>
+  <launchable type="desktop-id">org.uliblock.UliBlock.desktop</launchable>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0</project_license>
-  <name>TurboWarp</name>
-  <developer id="org.turbowarp">
-    <name>Thomas Weber</name>
+  <name>UliBlock</name>
+  <developer id="org.uliblock">
+    <name>123asxcqasdc</name>
   </developer>
   <summary>Make games, animations, and stories</summary>
   <description>
@@ -25,7 +25,7 @@
       <li>Backpack</li>
       <li>and more</li>
     </ul>
-    <p>You can also use TurboWarp in your browser at https://turbowarp.org/editor</p>
+    <p>UliBlock is based on TurboWarp (https://turbowarp.org)</p>
     <p>Project shown in screenshots is https://scratch.mit.edu/projects/425020125/</p>
   </description>
   <screenshots>
@@ -38,10 +38,10 @@
       <image width="1153" height="734">https://raw.githubusercontent.com/TurboWarp/desktop-screenshots/bb4612ebefe99d816ae7e60f70f59e18d5fef3b9/flathub/pt-dark.png</image>
     </screenshot>
   </screenshots>
-  <url type="homepage">https://desktop.turbowarp.org/</url>
-  <url type="bugtracker">https://github.com/TurboWarp/desktop/issues</url>
-  <url type="translate">https://docs.turbowarp.org/translate</url>
-  <url type="vcs-browser">https://github.com/TurboWarp/desktop</url>
+  <url type="homepage">https://github.com/123asxcqasdc/UliBlock</url>
+  <url type="bugtracker">https://github.com/123asxcqasdc/UliBlock/issues</url>
+  <url type="translate">https://github.com/123asxcqasdc/UliBlock</url>
+  <url type="vcs-browser">https://github.com/123asxcqasdc/UliBlock</url>
   <categories>
     <category>Development</category>
   </categories>
