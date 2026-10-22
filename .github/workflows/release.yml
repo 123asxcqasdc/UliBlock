@@ -1,5 +1,6 @@
 name: Release
 
+# Builds the release artifacts for a tag and attaches them to the GitHub release.
 on:
   push:
     tags:
