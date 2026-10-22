@@ -215,7 +215,9 @@ const build = async ({
       extraMetadata: {
         tw_dist: distributionName,
         tw_warn_legacy: isProduction,
-        tw_update: isProduction && manageUpdates
+        // UliBlock does not have its own update server yet. The upstream update checker
+        // talks to desktop.turbowarp.org and would offer TurboWarp releases instead.
+        tw_update: false
       },
       afterPack: arch === Arch.universal ? afterPackForUniversalMac : afterPack,
       afterSign,
