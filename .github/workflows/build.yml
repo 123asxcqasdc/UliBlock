@@ -31,7 +31,7 @@ jobs:
       run: npm run webpack:prod
     - name: Package
       run: |
-        node release-automation/build.mjs --debian --tarball --appimage --x64 --armv7l --arm64
+        node release-automation/build.mjs --appimage --x64
     - name: Print file tree
       run: node scripts/print-file-tree.mjs dist
     - name: Upload artifacts to GitHub Actions
@@ -39,8 +39,6 @@ jobs:
       with:
         name: linux
         path: |
-          dist/*.deb
-          dist/*.tar.gz
           dist/*.AppImage
 
   build-windows:
