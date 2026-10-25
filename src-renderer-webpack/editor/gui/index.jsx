@@ -13,11 +13,12 @@ ReactDOM.render(<GUI />, appTarget);
 try {
     if (window.SplashEnd) {
         setTimeout(() => window.SplashEnd(), 0);
-    } else {
-        document.body.classList.add('tw-loaded');
     }
+    setTimeout(() => {
+        try { document.body.classList.add('tw-loaded'); } catch (e) {}
+    }, 100);
 } catch (e) {
-    document.body.classList.add('tw-loaded');
+    try { document.body.classList.add('tw-loaded'); } catch (e) {}
 }
 
 require('./addons');
