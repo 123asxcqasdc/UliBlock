@@ -17,34 +17,27 @@
         text-align: center;
         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
         color: white;
+        background: #1e1e1e;
       }
       .splash-screen[hidden],
       .tw-loaded .splash-screen {
         display: none;
       }
-      .splash-screen[data-theme="dark"] {
-        background-color: #333;
-        color: white;
+      .splash-screen[data-theme="light"] {
+        background: #ffffff;
+        color: #1e1e1e;
       }
-      .splash-spinner:after {
-        content: " ";
-        display: block;
-        width: 64px;
-        height: 64px;
-        border-radius: 50%;
-        border: 6px solid;
-        border-color: currentColor transparent currentColor transparent;
-        animation: splash-spinner 1.2s linear infinite;
-      }
-      @keyframes splash-spinner {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+      .splash-animation {
+        width: 256px;
+        height: 256px;
+        image-rendering: auto;
+        background: transparent;
       }
     </style>
   </head>
   <body>
     <div class="splash-screen" id="spash-waiting-for-js" hidden>
-      <div class="splash-spinner"></div>
+      <img class="splash-animation" src="ulitka.gif" alt="UliBlock loading" />
     </div>
 
     <script>
@@ -83,10 +76,25 @@
 
         var splash = document.getElementById('spash-waiting-for-js');
         splash.setAttribute('data-theme', theme);
-        if (theme !== 'dark') {
+        if (theme === 'dark') {
+          splash.style.background = '#1e1e1e';
+        } else if (theme === 'light') {
+          splash.style.background = '#ffffff';
+        } else {
           splash.style.backgroundColor = accent;
         }
         splash.hidden = false;
+
+        window.SplashEnd = function() {
+          splash.hidden = true;
+          document.body.classList.add('tw-loaded');
+        };
+        setTimeout(function() {
+          if (!splash.hidden) {
+            splash.hidden = true;
+            document.body.classList.add('tw-loaded');
+          }
+        }, 60000);
       })();
     </script>
 
