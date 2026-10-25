@@ -6,15 +6,19 @@ import './media-device-chooser-impl.js';
 import '../prompt/prompt.js';
 
 const appTarget = document.getElementById('app');
-try {
-    if (window.SplashEnd) window.SplashEnd();
-    else document.body.classList.add('tw-loaded');
-} catch (e) {
-    document.body.classList.add('tw-loaded');
-}
 GUI.setAppElement(appTarget);
 
 ReactDOM.render(<GUI />, appTarget);
+
+try {
+    if (window.SplashEnd) {
+        setTimeout(() => window.SplashEnd(), 0);
+    } else {
+        document.body.classList.add('tw-loaded');
+    }
+} catch (e) {
+    document.body.classList.add('tw-loaded');
+}
 
 require('./addons');
 
