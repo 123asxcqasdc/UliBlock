@@ -86,6 +86,10 @@ module.exports = [
                     {
                         context: 'src-renderer-webpack/editor/gui/',
                         from: '*.html'
+                    },
+                    {
+                        context: 'src-renderer-webpack/editor/gui/',
+                        from: 'ulitka.gif'
                     }
                 ]
             })
