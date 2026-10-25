@@ -81,7 +81,7 @@
     ]
   },
   {
-    "version": "1.14.2",
+    "version": "1.17.2",
     "date": "2025-5-30",
     "notes": [
       "Significantly optimize saving large projects",
