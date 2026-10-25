@@ -96,6 +96,18 @@
       function webpackScriptError(event) {
         alert(`Error loading webpack script: ${event.target.src}`);
       }
+      try {
+        document.body.classList.add('tw-loaded');
+      } catch (e) {}
+      setTimeout(function() {
+        try { document.body.classList.add('tw-loaded'); } catch (e) {}
+      }, 10);
+      setTimeout(function() {
+        try { document.body.classList.add('tw-loaded'); } catch (e) {}
+      }, 100);
+      setTimeout(function() {
+        try { document.body.classList.add('tw-loaded'); } catch (e) {}
+      }, 500);
     </script>
     <script src="index.js" onerror="webpackScriptError(event)"></script>
   </body>
