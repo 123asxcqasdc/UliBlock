@@ -17,19 +17,28 @@
         text-align: center;
         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
         color: white;
-        background: #1e1e1e;
+        background: #3fb950;
       }
       .splash-screen[hidden],
-      .tw-loaded .splash-screen {
-        display: none;
+      .tw-loaded .splash-screen,
+      html.tw-loaded .splash-screen {
+        display: none !important;
       }
       html,
       body {
+        background: #3fb950;
+      }
+      .splash-screen[data-theme="dark"] {
         background: #1e1e1e;
+        color: white;
       }
       .splash-screen[data-theme="light"] {
         background: #ffffff;
         color: #1e1e1e;
+      }
+      html[data-theme="dark"],
+      html[data-theme="dark"] body {
+        background: #1e1e1e;
       }
       html[data-theme="light"],
       html[data-theme="light"] body {
@@ -94,15 +103,18 @@
           document.documentElement.style.background = '#ffffff';
           document.body.style.background = '#ffffff';
         } else {
-          splash.style.backgroundColor = accent;
-          document.documentElement.style.backgroundColor = accent;
-          document.body.style.backgroundColor = accent;
+          splash.style.backgroundColor = '#3fb950';
+          document.documentElement.style.backgroundColor = '#3fb950';
+          document.body.style.backgroundColor = '#3fb950';
         }
         splash.hidden = false;
 
         window.SplashEnd = function() {
-          splash.hidden = true;
-          document.body.classList.add('tw-loaded');
+          try {
+            splash.hidden = true;
+            document.body.classList.add('tw-loaded');
+            document.documentElement.classList.add('tw-loaded');
+          } catch (e) {}
         };
         setTimeout(function() {
           if (!splash.hidden) {

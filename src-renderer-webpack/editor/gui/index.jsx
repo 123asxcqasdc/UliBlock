@@ -6,7 +6,12 @@ import './media-device-chooser-impl.js';
 import '../prompt/prompt.js';
 
 const appTarget = document.getElementById('app');
-document.body.classList.add('tw-loaded');
+try {
+    if (window.SplashEnd) window.SplashEnd();
+    else document.body.classList.add('tw-loaded');
+} catch (e) {
+    document.body.classList.add('tw-loaded');
+}
 GUI.setAppElement(appTarget);
 
 ReactDOM.render(<GUI />, appTarget);
