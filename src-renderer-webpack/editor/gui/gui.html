@@ -17,44 +17,34 @@
         text-align: center;
         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
         color: white;
-        background: #3fb950;
       }
       .splash-screen[hidden],
-      .tw-loaded .splash-screen,
-      html.tw-loaded .splash-screen {
-        display: none !important;
-      }
-      html,
-      body {
-        background: #3fb950;
+      .tw-loaded .splash-screen {
+        display: none;
       }
       .splash-screen[data-theme="dark"] {
-        background: #1e1e1e;
+        background-color: #333;
         color: white;
       }
-      .splash-screen[data-theme="light"] {
-        background: #ffffff;
-        color: #1e1e1e;
+      .splash-spinner:after {
+        content: " ";
+        display: block;
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        border: 6px solid;
+        border-color: currentColor transparent currentColor transparent;
+        animation: splash-spinner 1.2s linear infinite;
       }
-      html[data-theme="dark"],
-      html[data-theme="dark"] body {
-        background: #1e1e1e;
-      }
-      html[data-theme="light"],
-      html[data-theme="light"] body {
-        background: #ffffff;
-      }
-      .splash-animation {
-        width: 256px;
-        height: 256px;
-        image-rendering: auto;
-        background: transparent;
+      @keyframes splash-spinner {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
       }
     </style>
   </head>
   <body>
     <div class="splash-screen" id="spash-waiting-for-js" hidden>
-      <img class="splash-animation" src="ulitka.gif" alt="UliBlock loading" />
+      <div class="splash-spinner"></div>
     </div>
 
     <script>
@@ -93,35 +83,10 @@
 
         var splash = document.getElementById('spash-waiting-for-js');
         splash.setAttribute('data-theme', theme);
-        document.documentElement.setAttribute('data-theme', theme);
-        if (theme === 'dark') {
-          splash.style.background = '#1e1e1e';
-          document.documentElement.style.background = '#1e1e1e';
-          document.body.style.background = '#1e1e1e';
-        } else if (theme === 'light') {
-          splash.style.background = '#ffffff';
-          document.documentElement.style.background = '#ffffff';
-          document.body.style.background = '#ffffff';
-        } else {
-          splash.style.backgroundColor = '#3fb950';
-          document.documentElement.style.backgroundColor = '#3fb950';
-          document.body.style.backgroundColor = '#3fb950';
+        if (theme !== 'dark') {
+          splash.style.backgroundColor = accent;
         }
         splash.hidden = false;
-
-        window.SplashEnd = function() {
-          try {
-            splash.hidden = true;
-            document.body.classList.add('tw-loaded');
-            document.documentElement.classList.add('tw-loaded');
-          } catch (e) {}
-        };
-        setTimeout(function() {
-          if (!splash.hidden) {
-            splash.hidden = true;
-            document.body.classList.add('tw-loaded');
-          }
-        }, 60000);
       })();
     </script>
 
