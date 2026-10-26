@@ -52,6 +52,7 @@ jobs:
         run: |
           mkdir -p _site
           cp -r dist-renderer-webpack/editor/gui/* _site/
+          cp _site/gui.html _site/index.html 2>&1 || true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
