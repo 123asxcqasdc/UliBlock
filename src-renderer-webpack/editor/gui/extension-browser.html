@@ -56,6 +56,11 @@
           var data = event.data;
           if (!data || typeof data !== 'object') return;
 
+          if (data.type === 'uliblock:close-browser') {
+            window.close();
+            return;
+          }
+
           if (window.opener) {
             try {
               window.opener.postMessage(data, '*');
