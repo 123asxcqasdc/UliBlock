@@ -613,6 +613,25 @@ class EditorWindow extends ProjectRunningWindow {
     const url = new URL(details.url);
     const params = new URLSearchParams(url.search);
 
+    // Open the extension gallery in a separate in-app window. This window is
+    // served from our own tw-editor: origin, which lets it relay import
+    // requests between the gallery iframe and the editor.
+    if (
+      url.protocol === 'tw-editor:' &&
+      url.pathname.endsWith('/extension-browser.html')
+    ) {
+      return {
+        action: 'allow',
+        overrideBrowserWindowOptions: {
+          width: 1200,
+          height: 850,
+          minWidth: 800,
+          minHeight: 600,
+          autoHideMenuBar: true
+        }
+      };
+    }
+
     // Open extension sample projects in-app
     if (
       url.protocol === 'tw-editor:' &&
