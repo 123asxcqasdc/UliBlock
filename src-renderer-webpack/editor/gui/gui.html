@@ -87,6 +87,11 @@
           splash.style.backgroundColor = '#3fb950';
         }
         splash.hidden = false;
+
+        window.SplashEnd = function () {
+          splash.hidden = true;
+          document.body.classList.add('tw-loaded');
+        };
       })();
     </script>
 
@@ -96,18 +101,6 @@
       function webpackScriptError(event) {
         alert(`Error loading webpack script: ${event.target.src}`);
       }
-      try {
-        document.body.classList.add('tw-loaded');
-      } catch (e) {}
-      setTimeout(function() {
-        try { document.body.classList.add('tw-loaded'); } catch (e) {}
-      }, 10);
-      setTimeout(function() {
-        try { document.body.classList.add('tw-loaded'); } catch (e) {}
-      }, 100);
-      setTimeout(function() {
-        try { document.body.classList.add('tw-loaded'); } catch (e) {}
-      }, 500);
     </script>
     <script src="index.js" onerror="webpackScriptError(event)"></script>
   </body>

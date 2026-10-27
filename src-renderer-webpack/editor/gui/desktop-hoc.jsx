@@ -82,6 +82,14 @@ const securityManager = {
 const USERNAME_KEY = 'tw:username';
 const DEFAULT_USERNAME = 'player';
 
+const endSplash = () => {
+  if (typeof window.SplashEnd === 'function') {
+    window.SplashEnd();
+  } else {
+    document.body.classList.add('tw-loaded');
+  }
+};
+
 const DesktopHOC = function (WrappedComponent) {
   class DesktopComponent extends React.Component {
     constructor (props) {
@@ -127,6 +135,7 @@ const DesktopHOC = function (WrappedComponent) {
         if (id === null) {
           this.props.onHasInitialProject(false, this.props.loadingState);
           this.props.onLoadingCompleted();
+          endSplash();
           return;
         }
 
@@ -136,6 +145,7 @@ const DesktopHOC = function (WrappedComponent) {
         await this.props.vm.loadProject(data);
         this.props.onLoadingCompleted();
         this.props.onLoadedProject(this.props.loadingState, true);
+        endSplash();
 
         const title = getDefaultProjectTitle(name);
         if (title) {
@@ -155,6 +165,7 @@ const DesktopHOC = function (WrappedComponent) {
         this.props.onLoadedProject(this.props.loadingState, false);
         this.props.onHasInitialProject(false, this.props.loadingState);
         this.props.onRequestNewProject();
+        endSplash();
       });
     }
     componentDidUpdate (prevProps, prevState) {

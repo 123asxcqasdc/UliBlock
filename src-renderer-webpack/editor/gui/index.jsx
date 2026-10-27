@@ -10,18 +10,6 @@ GUI.setAppElement(appTarget);
 
 ReactDOM.render(<GUI />, appTarget);
 
-try {
-    if (window.SplashEnd) {
-        try { window.SplashEnd(); } catch (e) {}
-    }
-} catch (e) {}
-try {
-    document.body.classList.add('tw-loaded');
-} catch (e) {}
-setTimeout(() => {
-    try { document.body.classList.add('tw-loaded'); } catch (e) {}
-}, 50);
-
 require('./addons');
 
 EditorPreload.getAdvancedCustomizations().then(({userscript, userstyle}) => {
