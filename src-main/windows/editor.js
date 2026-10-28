@@ -613,30 +613,6 @@ class EditorWindow extends ProjectRunningWindow {
     const url = new URL(details.url);
     const params = new URLSearchParams(url.search);
 
-    // Open the UliBlock extension gallery in a separate in-app window. The
-    // page is remote, so it must not inherit the editor preload or Node access.
-    if (
-      url.origin === 'https://123asxcqasdc.github.io' &&
-      url.pathname.startsWith('/turbowarp-extensions/')
-    ) {
-      return {
-        action: 'allow',
-        overrideBrowserWindowOptions: {
-          width: 1200,
-          height: 850,
-          minWidth: 800,
-          minHeight: 600,
-          autoHideMenuBar: true,
-          webPreferences: {
-            preload: path.join(__dirname, '..', 'empty-preload.js'),
-            nodeIntegration: false,
-            contextIsolation: true,
-            sandbox: true
-          }
-        }
-      };
-    }
-
     // Open extension sample projects in-app
     if (
       url.protocol === 'tw-editor:' &&
