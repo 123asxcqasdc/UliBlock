@@ -613,12 +613,11 @@ class EditorWindow extends ProjectRunningWindow {
     const url = new URL(details.url);
     const params = new URLSearchParams(url.search);
 
-    // Open the extension gallery in a separate in-app window. This window is
-    // served from our own tw-editor: origin, which lets it relay import
-    // requests between the gallery iframe and the editor.
+    // Open the UliBlock extension gallery in a separate in-app window. The
+    // page is remote, so it must not inherit the editor preload or Node access.
     if (
-      url.protocol === 'tw-editor:' &&
-      url.pathname.endsWith('/extension-browser.html')
+      url.origin === 'https://123asxcqasdc.github.io' &&
+      url.pathname.startsWith('/turbowarp-extensions/')
     ) {
       return {
         action: 'allow',
@@ -627,7 +626,13 @@ class EditorWindow extends ProjectRunningWindow {
           height: 850,
           minWidth: 800,
           minHeight: 600,
-          autoHideMenuBar: true
+          autoHideMenuBar: true,
+          webPreferences: {
+            preload: path.join(__dirname, '..', 'empty-preload.js'),
+            nodeIntegration: false,
+            contextIsolation: true,
+            sandbox: true
+          }
         }
       };
     }
