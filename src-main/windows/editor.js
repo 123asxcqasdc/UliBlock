@@ -20,6 +20,16 @@ const RichPresence = require('../rich-presence.js');
 const FileAccessWindow = require('./file-access-window.js');
 const ExtensionDocumentationWindow = require('./extension-documentation.js');
 
+// --- НОВЫЙ КОД: Хранение недавних проектов ---
+const saveRecentProject = (path, name) => {
+  let recent = settings.recentProjects || [];
+  recent = recent.filter(p => p.path !== path);
+  recent.unshift({ id: Date.now().toString(), path, name });
+  recent = recent.slice(0, 10);
+  settings.recentProjects = recent;
+  settings.save();
+};
+
 const TYPE_FILE = 'file';
 const TYPE_URL = 'url';
 const TYPE_SCRATCH = 'scratch';
@@ -111,14 +121,14 @@ const parseOpenedFile = (file, workingDirectory) => {
   if (url) {
     if (url.protocol === 'http:' || url.protocol === 'https:') {
       // Scratch URLs require special treatment as they are not direct downloads.
-      const scratchMatch = file.match(/^https?:\/\/scratch\.mit\.edu\/projects\/(\d+)\/?/);
+      const scratchMatch = file.match(/^https?:\\/\\/scratch\\.mit\\.edu\\/projects\\/(\\d+)\\/?/);
       if (scratchMatch) {
         return new OpenedFile(TYPE_SCRATCH, scratchMatch[1]);
       }
 
       // Need to manually redirect extension samples to the copies we already have offline as the
       // fetching code will not go through web request handlers or custom protocols.
-      const sampleMatch = file.match(/^https?:\/\/extensions\.turbowarp\.org\/samples\/(.+\.sb3)$/);
+      const sampleMatch = file.match(/^https?:\\/\\/extensions\\.turbowarp\\.org\\/samples\\/(.+\\.sb3)$/);
       if (sampleMatch) {
         return new OpenedFile(TYPE_SAMPLE, decodeURIComponent(sampleMatch[1]));
       }
@@ -232,6 +242,11 @@ class EditorWindow extends ProjectRunningWindow {
     if (initialFile !== null) {
       this.activeFileId = generateFileId();
       this.openedFiles.set(this.activeFileId, initialFile);
+      
+      // --- НОВЫЙ КОД: Сохраняем в недавние, если это файл ---
+      if (initialFile.type === TYPE_FILE) {
+        saveRecentProject(initialFile.path, path.basename(initialFile.path));
+      }
     }
 
     this.openedProjectAt = Date.now();
@@ -349,6 +364,9 @@ class EditorWindow extends ProjectRunningWindow {
       this.activeFileId = id;
       this.openedProjectAt = Date.now();
       this.window.setRepresentedFilename(file.path);
+      
+      // --- НОВЫЙ КОД: Сохраняем в недавние при открытии ---
+      saveRecentProject(file.path, path.basename(file.path));
     });
 
     this.ipc.handle('closed-file', () => {
@@ -377,6 +395,9 @@ class EditorWindow extends ProjectRunningWindow {
 
       const id = generateFileId();
       this.openedFiles.set(id, new OpenedFile(TYPE_FILE, filePath));
+
+      // --- НОВЫЙ КОД: Сохраняем в недавние ---
+      saveRecentProject(filePath, path.basename(filePath));
 
       return {
         id,
@@ -424,6 +445,9 @@ class EditorWindow extends ProjectRunningWindow {
 
       const id = generateFileId();
       this.openedFiles.set(id, new OpenedFile(TYPE_FILE, filePath));
+
+      // --- НОВЫЙ КОД: Сохраняем в недавние ---
+      saveRecentProject(filePath, path.basename(filePath));
 
       return {
         id,
@@ -631,7 +655,7 @@ class EditorWindow extends ProjectRunningWindow {
 
     // Open extension documentation in-app
     const extensionsDocsMatch = details.url.match(
-      /^https:\/\/extensions\.turbowarp\.org\/([\w_\-.\/]+)$/
+      /^https:\\/\\/extensions\\.turbowarp\\.org\\/([\\w_\\-.\\/]+)$/
     );
     if (extensionsDocsMatch) {
       ExtensionDocumentationWindow.open(extensionsDocsMatch[1]);

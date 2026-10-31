@@ -17,6 +17,7 @@ if (!process.mas && !app.requestSingleInstanceLock()) {
 const path = require('path');
 const AbstractWindow = require('./windows/abstract');
 const EditorWindow = require('./windows/editor');
+const StartupWindow = require('./windows/startup'); // НОВЫЙ ИМПОРТ
 const {checkForUpdates} = require('./update-checker');
 const {tranlateOrNull} = require('./l10n');
 const migrate = require('./migrate');
@@ -203,7 +204,9 @@ app.on('window-all-closed', () => {
 // macOS
 app.on('activate', () => {
   if (app.isReady() && !isMigrating && AbstractWindow.getWindowsByClass(EditorWindow).length === 0) {
-    EditorWindow.newWindow();
+    // НОВЫЙ ЛОГИК: Открываем стартовое окно вместо редактора
+    StartupWindow.singleton();
+    // EditorWindow.newWindow(); // УДАЛЯЕМ ЭТО
   }
 });
 
@@ -272,10 +275,21 @@ app.whenReady().then(() => {
     isMigrating = false;
 
     const commandLineOptions = parseCommandLine(process.argv);
-    EditorWindow.openFiles([
-      ...filesQueuedToOpen,
-      ...commandLineOptions.files
-    ], commandLineOptions.fullscreen, process.cwd());
+    
+    // НОВЫЙ ЛОГИК: Если есть файлы в командной строке, открываем редактор, иначе — стартовое окно
+    if (commandLineOptions.files.length > 0) {
+      EditorWindow.openFiles([
+        ...filesQueuedToOpen,
+        ...commandLineOptions.files
+      ], commandLineOptions.fullscreen, process.cwd());
+    } else {
+      // Открываем стартовое окно
+      StartupWindow.singleton();
+      // Если есть файлы в очереди (например, из macOS open-file), открываем их после стартового окна
+      if (filesQueuedToOpen.length > 0) {
+        EditorWindow.openFiles(filesQueuedToOpen, false, process.cwd());
+      }
+    }
 
     if (AbstractWindow.getAllWindows().length === 0) {
       // No windows were successfully opened. Let's just quit.
