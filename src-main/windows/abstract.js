@@ -142,24 +142,27 @@ class AbstractWindow {
   }
 
   getPreload () {
-    // to be overridden
+    // Если это стартовое окно, используем startup
+    if (this.constructor.name === 'StartupWindow') {
+      return 'startup';
+    }
+    // Для редактора — editor
+    return 'editor';
   }
 
   getDimensions () {
     // to be overridden
-    return {
-      width: 200,
-      height: 200
-    };
-  }
-
-  isPopup () {
-    // to be overridden
-    return false;
+    if (this.constructor.name === 'StartupWindow') {
+      return { width: 800, height: 600 };
+    }
+    return { width: 200, height: 200 };
   }
 
   getBackgroundColor () {
     // to be overridden
+    if (this.constructor.name === 'StartupWindow') {
+      return '#1e1e1e';
+    }
     return '#ffffff';
   }
 
@@ -168,8 +171,8 @@ class AbstractWindow {
     const options = {};
 
     options.useContentSize = true;
-    options.minWidth = 200;
-    options.minHeight = 200;
+    options.minWidth = this.constructor.name === 'StartupWindow' ? 600 : 200;
+    options.minHeight = this.constructor.name === 'StartupWindow' ? 400 : 200;
 
     // Child classes are expected to show the window on their own
     options.show = false;
@@ -183,7 +186,12 @@ class AbstractWindow {
 
     const preloadName = this.getPreload();
     if (preloadName) {
-      options.webPreferences.preload = path.resolve(__dirname, '../../src-preload/', `${preloadName}.js`);
+      // Если это startup, то прелоад в src-renderer/startup/index.js
+      if (preloadName === 'startup') {
+        options.webPreferences.preload = path.resolve(__dirname, '../../src-renderer/startup/', 'index.js');
+      } else {
+        options.webPreferences.preload = path.resolve(__dirname, '../../src-preload/', `${preloadName}.js`);
+      }
     }
 
     options.backgroundColor = this.getBackgroundColor();
