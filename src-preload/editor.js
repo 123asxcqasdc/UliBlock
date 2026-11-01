@@ -21,7 +21,13 @@ contextBridge.exposeInMainWorld('EditorPreload', {
   setExportForPackager: (callback) => {
     exportForPackager = callback;
   },
-  setIsFullScreen: (isFullScreen) => ipcRenderer.invoke('set-is-full-screen', isFullScreen)
+  setIsFullScreen: (isFullScreen) => ipcRenderer.invoke('set-is-full-screen', isFullScreen),
+  getStartMode: () => ipcRenderer.invoke('get-start-mode'),
+  getRecentProjects: () => ipcRenderer.invoke('get-recent-projects'),
+  openRecentProject: (filePath) => ipcRenderer.invoke('open-recent-project', filePath),
+  openProjectFromFile: () => ipcRenderer.invoke('open-project-from-file'),
+  createNewProject: () => ipcRenderer.invoke('create-new-project'),
+  openProjectFromScratch: () => ipcRenderer.invoke('open-project-from-scratch')
 });
 
 let exportForPackager = () => Promise.reject(new Error('exportForPackager missing'));

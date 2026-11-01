@@ -3,7 +3,7 @@ const path = require('path');
 const nodeURL = require('url');
 const zlib = require('zlib');
 const nodeCrypto = require('crypto');
-const {app, dialog} = require('electron');
+const {app, dialog, shell} = require('electron');
 const ProjectRunningWindow = require('./project-running-window');
 const AddonsWindow = require('./addons');
 const DesktopSettingsWindow = require('./desktop-settings');
@@ -19,6 +19,7 @@ const privilegedFetch = require('../fetch');
 const RichPresence = require('../rich-presence.js');
 const FileAccessWindow = require('./file-access-window.js');
 const ExtensionDocumentationWindow = require('./extension-documentation.js');
+const recentProjects = require('../recent-projects');
 
 const TYPE_FILE = 'file';
 const TYPE_URL = 'url';
@@ -215,8 +216,9 @@ class EditorWindow extends ProjectRunningWindow {
   /**
    * @param {OpenedFile|null} initialFile
    * @param {boolean} isInitiallyFullscreen
+   * @param {boolean} isStartScreen
    */
-  constructor (initialFile, isInitiallyFullscreen) {
+  constructor (initialFile, isInitiallyFullscreen, isStartScreen = false) {
     super();
 
     /**
@@ -228,6 +230,7 @@ class EditorWindow extends ProjectRunningWindow {
      */
     this.openedFiles = new Map();
     this.activeFileId = null;
+    this.isStartScreen = !!isStartScreen;
 
     if (initialFile !== null) {
       this.activeFileId = generateFileId();
@@ -310,6 +313,14 @@ class EditorWindow extends ProjectRunningWindow {
       return this.activeFileId;
     });
 
+    this.ipc.handle('get-start-mode', () => {
+      return this.isStartScreen ? 'home' : 'editor';
+    });
+
+    this.ipc.handle('get-recent-projects', () => {
+      return recentProjects.getRecent();
+    });
+
     this.ipc.handle('get-file', async (event, id) => {
       const file = getFileById(id);
       const {name, data} = await file.read();
@@ -349,6 +360,11 @@ class EditorWindow extends ProjectRunningWindow {
       this.activeFileId = id;
       this.openedProjectAt = Date.now();
       this.window.setRepresentedFilename(file.path);
+      try {
+        recentProjects.addRecent(file.path);
+      } catch (e) {
+        // ignore
+      }
     });
 
     this.ipc.handle('closed-file', () => {
@@ -378,10 +394,111 @@ class EditorWindow extends ProjectRunningWindow {
       const id = generateFileId();
       this.openedFiles.set(id, new OpenedFile(TYPE_FILE, filePath));
 
+      try {
+        recentProjects.addRecent(filePath);
+      } catch (e) {
+        // ignore
+      }
+
       return {
         id,
         name: path.basename(filePath)
       };
+    });
+
+    this.ipc.handle('open-project-from-file', async () => {
+      const result = await dialog.showOpenDialog(this.window, {
+        properties: ['openFile'],
+        defaultPath: settings.lastDirectory,
+        filters: [
+          {
+            name: 'Scratch Project',
+            extensions: ['sb3', 'sb2', 'sb'],
+          }
+        ]
+      });
+      if (result.canceled) {
+        return null;
+      }
+      const filePath = result.filePaths[0];
+      settings.lastDirectory = path.dirname(filePath);
+      await settings.save();
+      try {
+        recentProjects.addRecent(filePath);
+      } catch (e) {
+        // ignore
+      }
+      const parsedFile = parseOpenedFile(filePath, settings.lastDirectory);
+      new EditorWindow(parsedFile, null);
+      this.window.close();
+      return {ok: true};
+    });
+
+    this.ipc.handle('open-recent-project', async (event, filePath) => {
+      if (!filePath) return null;
+      try {
+        const parsedFile = parseOpenedFile(filePath, settings.lastDirectory);
+        new EditorWindow(parsedFile, null);
+        this.window.close();
+        return {ok: true};
+      } catch (e) {
+        recentProjects.removeRecent(filePath);
+        throw e;
+      }
+    });
+
+    this.ipc.handle('create-new-project', () => {
+      new EditorWindow(null, null);
+      this.window.close();
+      return {ok: true};
+    });
+
+    this.ipc.handle('open-project-from-scratch', async () => {
+      const result = await dialog.showMessageBox(this.window, {
+        type: 'info',
+        title: APP_NAME,
+        message: translate('open-scratch-project') || 'Open project from Scratch',
+        detail: translate('open-scratch-project-detail') || 'Enter a Scratch project URL or ID.',
+        buttons: ['Cancel', 'OK'],
+        defaultId: 1,
+        cancelId: 0
+      });
+      if (result.response !== 1) return null;
+      const {BrowserWindow} = require('electron');
+      const win = new BrowserWindow({
+        parent: this.window,
+        modal: true,
+        width: 420,
+        height: 200,
+        resizable: false,
+        title: 'Open from Scratch',
+        webPreferences: {
+          nodeIntegration: false,
+          contextIsolation: true
+        }
+      });
+      win.loadURL('data:text/html,' + encodeURIComponent(`
+        <html><body style="font-family:sans-serif;padding:16px">
+        <label>Project URL or ID:</label><br>
+        <input id="i" style="width:100%" autofocus><br><br>
+        <button onclick="ok()">Open</button>
+        <script>
+        function ok(){ const v=document.getElementById('i').value.trim(); require('electron').ipcRenderer.send('ub-scratch-open', v); }
+        </script>
+        </body></html>
+      `));
+      const {ipcMain} = require('electron');
+      const handler = (e, val) => {
+        if (e.sender !== win.webContents) return;
+        ipcMain.removeListener('ub-scratch-open', handler);
+        win.close();
+        if (!val) return;
+        const parsedFile = parseOpenedFile(val, settings.lastDirectory);
+        new EditorWindow(parsedFile, null);
+        this.window.close();
+      };
+      ipcMain.on('ub-scratch-open', handler);
+      return {ok: true};
     });
 
     this.ipc.handle('show-save-file-picker', async (event, suggestedName) => {
@@ -671,7 +788,7 @@ class EditorWindow extends ProjectRunningWindow {
    * @param {boolean} fullscreen
    */
   static newWindow (fullscreen) {
-    new EditorWindow(null, fullscreen);
+    new EditorWindow(null, fullscreen, true);
   }
 }
 

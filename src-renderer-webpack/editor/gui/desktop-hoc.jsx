@@ -21,6 +21,7 @@ import {
 } from 'scratch-gui/src/reducers/tw';
 import {WrappedFileHandle} from './filesystem-api.js';
 import {setStrings} from '../prompt/prompt.js';
+import StartScreen from './start-screen.jsx';
 
 let mountedOnce = false;
 
@@ -63,18 +64,8 @@ const handleClickSourceCode = () => {
 };
 
 const securityManager = {
-  // Everything not specified here falls back to the scratch-gui security manager
-
-  // Managed by Electron main process:
-  canReadClipboard: () => true,
-  canNotify: () => true,
-
-  // Does not work in Electron:
-  canGeolocate: () => false,
-
-  // UliBlock: extensions load without a confirmation dialog and unsandboxed.
-  // This intentionally matches the warning in the extension gallery: custom
-  // extension code is trusted, third-party code can be malicious.
+  // Everything else falls back to the scratch-gui security manager.
+  // Keep only extension auto-loading behavior.
   canLoadExtensionFromProject: () => true,
   getSandboxMode: () => 'unsandboxed'
 };
@@ -95,7 +86,8 @@ const DesktopHOC = function (WrappedComponent) {
     constructor (props) {
       super(props);
       this.state = {
-        title: ''
+        title: '',
+        showStartScreen: false
       };
       this.handleUpdateProjectTitle = this.handleUpdateProjectTitle.bind(this);
 
@@ -132,6 +124,21 @@ const DesktopHOC = function (WrappedComponent) {
       (async () => {
         // Note that 0 is a valid ID and does mean there is a file open
         const id = await EditorPreload.getInitialFile();
+        let startMode = 'editor';
+        if (typeof EditorPreload.getStartMode === 'function') {
+          try {
+            startMode = await EditorPreload.getStartMode();
+          } catch (e) {
+            startMode = 'editor';
+          }
+        }
+        if (id === null && startMode === 'home') {
+          this.props.onHasInitialProject(false, this.props.loadingState);
+          this.props.onLoadingCompleted();
+          this.setState({showStartScreen: true});
+          endSplash();
+          return;
+        }
         if (id === null) {
           this.props.onHasInitialProject(false, this.props.loadingState);
           this.props.onLoadingCompleted();
@@ -218,34 +225,37 @@ const DesktopHOC = function (WrappedComponent) {
         ...props
       } = this.props;
       return (
-        <WrappedComponent
-          projectTitle={this.state.title}
-          onUpdateProjectTitle={this.handleUpdateProjectTitle}
-          onClickAddonSettings={handleClickAddonSettings}
-          onClickNewWindow={handleClickNewWindow}
-          onClickPackager={handleClickPackager}
-          onClickAbout={[
-            {
-              title: this.messages['in-app-about.desktop-settings'],
-              onClick: handleClickDesktopSettings
-            },
-            {
-              title: this.messages['in-app-about.privacy'],
-              onClick: handleClickPrivacy
-            },
-            {
-              title: this.messages['in-app-about.about'],
-              onClick: handleClickAbout
-            },
-            {
-              title: this.messages['in-app-about.source-code'],
-              onClick: handleClickSourceCode
-            },
-          ]}
-          onClickDesktopSettings={handleClickDesktopSettings}
-          securityManager={securityManager}
-          {...props}
-        />
+        <React.Fragment>
+          <WrappedComponent
+            projectTitle={this.state.title}
+            onUpdateProjectTitle={this.handleUpdateProjectTitle}
+            onClickAddonSettings={handleClickAddonSettings}
+            onClickNewWindow={handleClickNewWindow}
+            onClickPackager={handleClickPackager}
+            onClickAbout={[
+              {
+                title: this.messages['in-app-about.desktop-settings'],
+                onClick: handleClickDesktopSettings
+              },
+              {
+                title: this.messages['in-app-about.privacy'],
+                onClick: handleClickPrivacy
+              },
+              {
+                title: this.messages['in-app-about.about'],
+                onClick: handleClickAbout
+              },
+              {
+                title: this.messages['in-app-about.source-code'],
+                onClick: handleClickSourceCode
+              },
+            ]}
+            onClickDesktopSettings={handleClickDesktopSettings}
+            securityManager={securityManager}
+            {...props}
+          />
+          {this.state.showStartScreen ? <StartScreen /> : null}
+        </React.Fragment>
       );
     }
   }
